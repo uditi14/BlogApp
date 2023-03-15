@@ -1,4 +1,4 @@
-import randomImg from './assets/image.png'
+import randomImg from './image.png'
 
 export default function Post(){
     return(

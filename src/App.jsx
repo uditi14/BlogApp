@@ -1,7 +1,6 @@
-import { useState } from 'react'
 import './App.css'
-import Post from './Post.jsx'
-import Header from './Header.jsx'
+import Post from './assets/Post.jsx'
+import Header from './assets/Header.jsx'
 
 
 function App() {
