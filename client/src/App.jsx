@@ -1,6 +1,6 @@
 import './App.css'
-import Post from './assets/Post.jsx'
-import Header from './assets/Header.jsx'
+import Post from './Post.jsx'
+import Header from './Header.jsx'
 
 
 function App() {
