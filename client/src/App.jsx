@@ -1,18 +1,24 @@
 import './App.css'
-import Post from './Post.jsx'
-import Header from './Header.jsx'
-
+import IndexPage from "./pages/IndexPage.jsx"
+import {Route,Routes} from 'react-router-dom'
+import Layout from './Layout.jsx';
+import RegLogin from './pages/RegLogin';
 
 function App() {
 
   return (
-  <main>
-    <Header/>
-    <Post />
-    <Post />
-    <Post />
-  </main>
-  )
+    <Routes>
+      <Route path="/" element={<Layout/>}>
+        <Route index element={<IndexPage />}/>
+        <Route path={'/login'} element={<RegLogin/>}/>
+        <Route path={'/register'} element={<RegLogin/>}/>
+      </Route>
+    </Routes>
+  );
 }
 
 export default App
+/*
+
+ */
+      
