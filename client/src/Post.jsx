@@ -1,40 +1,33 @@
-import { formatISO9075 } from "date-fns";
-import { useContext, useEffect, useState } from "react";
-import { useParams } from "react-router";
+import randomImg from "./image.png";
+import { format } from "date-fns";
 import { Link } from "react-router-dom";
-import { UserContext } from "../UserContex";
-export default function PostPage() {
-  const [postinfo, setpostinfo] = useState(null);
-  const { userinfo } = useContext(UserContext);
-  const { id } = useParams();
-  useEffect(() => {
-    fetch(`http://localhost:5000/post/${id}`).then((response) => {
-      response.json().then((postinfo) => {
-        setpostinfo(postinfo);
-      });
-    });
-    console.log(userinfo);
-    // console.log(postinfo.author._id);
-  }, []);
 
-  if (!postinfo) return "";
-
+export default function Post({
+  _id,
+  title,
+  summary,
+  cover,
+  content,
+  createdAt,
+  author,
+}) {
   return (
-    <div className="post-page">
-      <h1>{postinfo.title}</h1>
-      <time>{formatISO9075(new Date(postinfo.createdAt))}</time>
-      <div className="author">by @{postinfo.author.name}</div>
-      {userinfo.id === postinfo.author._id && (
-        <div className="edit-row">
-          <Link className="edit-btn" to={`/edit/${postinfo._id}`}>
-            Edit this post
-          </Link>
-        </div>
-      )}
+    <div className="post">
       <div className="image">
-        <img src={`http://localhost:5000/${postinfo.cover}`} alt="" />
+        <Link to={`/post/${_id}`}>
+          <img src={"http://localhost:5000/" + cover} alt="" />
+        </Link>
       </div>
-      <div dangerouslySetInnerHTML={{ __html: postinfo.content }} />
+      <div className="text">
+        <Link to={`/post/${_id}`}>
+          <h2>{title}</h2>
+        </Link>
+        <p className="info">
+          <a className="author">{author ? author.name : "Unknown"}</a>
+          <time>{format(new Date(createdAt), "MMM d,yyyy HH:mm")}</time>
+        </p>
+        <p className="summary">{summary}</p>
+      </div>
     </div>
   );
 }

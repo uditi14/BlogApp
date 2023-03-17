@@ -172,9 +172,6 @@ app.get("/profile", (req, res) => {
 });
 
 //logout
-app.post("/logout", (req, res) => {
-  res.cookie("token", "").json("ok");
-});
 
 //createpost
 app.post("/post", uploadMiddleware.single("file"), async (req, res) => {
@@ -205,6 +202,40 @@ app.post("/post", uploadMiddleware.single("file"), async (req, res) => {
   });
 });
 
+//post put
+app.put("/post", uploadMiddleware.single("file"), async (req, res) => {
+  let newPath = null;
+  if (req.file) {
+    const { originalname, path } = req.file;
+    const parts = originalname.split(".");
+    const ext = parts[parts.length - 1];
+    newPath = path + "." + ext;
+    fs.renameSync(path, newPath);
+  }
+
+  const { token } = req.cookies;
+
+  jwt.verify(token, secret, {}, async (err, info) => {
+    if (err) throw err;
+    const { id, title, summary, content } = req.body;
+    const postDoc = await Post.findById(id);
+    const isAuthor = JSON.stringify(postDoc.author) === JSON.stringify(info.id);
+    // res.json({ isAuthor, postDoc, info });
+    if (!isAuthor) {
+      return res.status(400).json("you are not the author ");
+    }
+    console.log(newPath);
+    await postDoc.updateOne({
+      title,
+      summary,
+      content,
+      cover: newPath ? newPath : postDoc.cover,
+    });
+    console.log(newPath);
+    res.json(postDoc);
+  });
+});
+
 //post get
 app.get("/post", async (req, res) => {
   // const posts=
@@ -216,12 +247,16 @@ app.get("/post", async (req, res) => {
   );
 });
 
-app.get('/post/:id', async(req,res)=>{
-  const {id}=req.params;
-//  await Post.findById(id);
- const postDoc=await Post.findById(id).populate('author',['name'])
+app.get("/post/:id", async (req, res) => {
+  const { id } = req.params;
+  //  await Post.findById(id);
+  const postDoc = await Post.findById(id).populate("author", ["name"]);
+  res.json(postDoc);
+});
 
-})
+app.post("/logout", (req, res) => {
+  res.cookie("token", "").json("ok");
+});
 
 //start server
 app.listen(5000, () => {
