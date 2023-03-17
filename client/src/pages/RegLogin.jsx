@@ -1,13 +1,15 @@
-import React from "react";
+import React, { useContext } from "react";
 import { useState } from "react";
 import { Box, Button, TextField, Typography } from "@mui/material";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { Navigate } from "react-router-dom";
+import { UserContext } from "../UserContext";
 
 function RegLogin() {
   const [Redirect, setRedirect] = useState(false);
+  const { setuserinfo } = useContext(UserContext);
   //isSignup set to false kyuki pahele screen pe login page dikhega
   const [isSignUp, setisSignUp] = useState(false);
   //sare cheezen jo hame lagegi wo yaha par hum retrieve kar rhe hai front end se taaki backend me bhej sake
@@ -37,7 +39,9 @@ function RegLogin() {
               withCredentials: true,
             }
           );
+          console.log(inputdata);
           if (response.status === 204 || response.status === 200) {
+            setuserinfo(response.data);
             setRedirect(true);
           } else {
             console.log("Invalid password");
@@ -167,4 +171,4 @@ function RegLogin() {
   );
 }
 
-export default RegLogin;
+export default RegLogin

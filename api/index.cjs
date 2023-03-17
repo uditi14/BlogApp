@@ -9,11 +9,13 @@ const multer = require("multer");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const fs = require("fs");
+const { info } = require("console");
 const app = express();
 
 app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
 app.use(express.json());
 app.use(cookieParser());
+app.use("/uploads", express.static(__dirname + "/uploads"));
 // configure Multer to store uploaded files in a folder named 'uploads'
 const uploadMiddleware = multer({ dest: "uploads/" });
 // WfKrSMlewnwuTRLu mongo atlast pass
@@ -116,11 +118,11 @@ app.get("/", (req, res) => {
 //Handle user login
 
 app.post("/login", async (req, res) => {
-  const { username, email, password } = req.body;
+  const { name, email, password } = req.body;
 
   try {
     //Finding the user with email
-    const Ouruser = await user.findOne({ email, username });
+    const Ouruser = await user.findOne({ email, name });
     if (!Ouruser) {
       return res.status(400).json({ message: "Invalid" });
     }
@@ -131,16 +133,26 @@ app.post("/login", async (req, res) => {
       //log in
       res.status(400).json({ message: error.message });
     } else {
-      jwt.sign({ username, id: Ouruser._id }, secret, {}, (err, token) => {
+      jwt.sign({ name, id: Ouruser._id }, secret, {}, (err, token) => {
         if (err) throw err;
-        res.cookie("token", token).json("ok");
+        res.cookie("token", token).json({
+          id: Ouruser._id,
+          name,
+        });
       });
     }
-    res.json({ message: "Login success" });
+    // res.json({ message: "Login success" });
     // res.status(200).json({ message: "Login success" });
   } catch (error) {
     res.status(400).json({ message: error.message + "catch" });
   }
+});
+
+app.get("/set-cookie", (req, res) => {
+  res.cookie("myCookie", "myValue", {
+    httpOnly: true,
+  });
+  res.send("Cookie set!");
 });
 
 //profile
@@ -151,14 +163,18 @@ app.get("/profile", (req, res) => {
     return res.status(401).json({ message: "No token, authorization denied" });
   }
 
-  jwt.verify(token, secret, {}, (err, decoded) => {
+  jwt.verify(token, secret, {}, (err, info) => {
     if (err) throw err;
-    const { username } = decoded;
-    res.json({ username });
+    // const { username } = decoded;
+    // res.json({ username });
+    res.json(info);
   });
 });
 
 //logout
+app.post("/logout", (req, res) => {
+  res.cookie("token", "").json("ok");
+});
 
 //createpost
 app.post("/post", uploadMiddleware.single("file"), async (req, res) => {
@@ -172,16 +188,40 @@ app.post("/post", uploadMiddleware.single("file"), async (req, res) => {
   const newPath = path + "." + ext;
   fs.renameSync(path, newPath);
 
-  const { title, summary, content } = req.body;
-  const postDoc = await Post.create({
-    title,
-    summary,
-    content,
-    cover: newPath,
-  });
+  const { token } = req.cookies;
 
-  res.json({ postDoc });
+  jwt.verify(token, secret, {}, async (err, info) => {
+    if (err) throw err;
+    const { title, summary, content } = req.body;
+    const postDoc = await Post.create({
+      title,
+      summary,
+      content,
+      cover: newPath,
+      author: info.id,
+    });
+    res.json(postDoc);
+    // res.json(info);
+  });
 });
+
+//post get
+app.get("/post", async (req, res) => {
+  // const posts=
+  res.json(
+    await Post.find()
+      .populate("author", ["name"])
+      .sort({ createdAt: -1 })
+      .limit(20)
+  );
+});
+
+app.get('/post/:id', async(req,res)=>{
+  const {id}=req.params;
+//  await Post.findById(id);
+ const postDoc=await Post.findById(id).populate('author',['name'])
+
+})
 
 //start server
 app.listen(5000, () => {
