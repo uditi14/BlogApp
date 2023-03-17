@@ -5,7 +5,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { Navigate } from "react-router-dom";
-import { UserContext } from "../UserContext";
+import { UserContext } from "../UserContex";
 
 function RegLogin() {
   const [Redirect, setRedirect] = useState(false);
@@ -74,12 +74,14 @@ function RegLogin() {
         console.log(inputdata);
 
         //frontend-backend connection
-        axios
-          .post("http://localhost:5000/signup", inputdata)
-          .then((res) => console.log(res));
+        axios.post("http://localhost:5000/signup", inputdata).then((res) => {
+          console.log(res);
+          if (res.status === 200 || res.status === 201) {
+            window.location.href = "/login";
+          } else console.log("lol");
+        });
         console.log(inputdata);
         //if connection successful, ie data gaya db me sahi se from signup page toh href se login page pe redirect ho jaaenge
-        // window.location.href = "/login";
       } //end of if
       //else me error denge agar fname , email ya password me se koi bhi ek missing hai toh
       else {
@@ -87,9 +89,6 @@ function RegLogin() {
       }
     }
   }; //end of submit form
-  {
-    Redirect && <Navigate to={"/demo"} />;
-  }
   const HandleChange = (event, data) => {
     //  event.preventDefault();
     setinput({ ...input, [data]: event.target.value });
@@ -171,4 +170,4 @@ function RegLogin() {
   );
 }
 
-export default RegLogin
+export default RegLogin;
