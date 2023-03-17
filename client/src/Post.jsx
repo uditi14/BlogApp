@@ -1,19 +1,40 @@
-import randomImg from './image.png'
+import { formatISO9075 } from "date-fns";
+import { useContext, useEffect, useState } from "react";
+import { useParams } from "react-router";
+import { Link } from "react-router-dom";
+import { UserContext } from "../UserContex";
+export default function PostPage() {
+  const [postinfo, setpostinfo] = useState(null);
+  const { userinfo } = useContext(UserContext);
+  const { id } = useParams();
+  useEffect(() => {
+    fetch(`http://localhost:5000/post/${id}`).then((response) => {
+      response.json().then((postinfo) => {
+        setpostinfo(postinfo);
+      });
+    });
+    console.log(userinfo);
+    // console.log(postinfo.author._id);
+  }, []);
 
-export default function Post(){
-    return(
-        <div className="post">
-        <div className="image">
-          <img src={randomImg}></img>
+  if (!postinfo) return "";
+
+  return (
+    <div className="post-page">
+      <h1>{postinfo.title}</h1>
+      <time>{formatISO9075(new Date(postinfo.createdAt))}</time>
+      <div className="author">by @{postinfo.author.name}</div>
+      {userinfo.id === postinfo.author._id && (
+        <div className="edit-row">
+          <Link className="edit-btn" to={`/edit/${postinfo._id}`}>
+            Edit this post
+          </Link>
         </div>
-        <div className="text">
-          <h2>The Importance of Vocabulary</h2>
-          <p className="info">
-            <a className="author">John Doe</a>
-            <time>2023-01-15 13:39</time>
-          </p>
-          <p className='summary'>Vocabulary is the knowledge of words, and vocabulary words are a specific set of words to be learned. Vocabulary is an essential component of reading comprehension.</p>
-        </div>
+      )}
+      <div className="image">
+        <img src={`http://localhost:5000/${postinfo.cover}`} alt="" />
       </div>
-    )
+      <div dangerouslySetInnerHTML={{ __html: postinfo.content }} />
+    </div>
+  );
 }
