@@ -1,28 +1,29 @@
-import "./App.css";
-import IndexPage from "./pages/IndexPage.jsx";
-import { Route, Routes } from "react-router-dom";
-import Layout from "./Layout.jsx";
-import RegLogin from "./pages/RegLogin";
-import { UserContextProvider } from "./UserContex";
-import CreatePost from "./pages/CreatePost";
-import PostPage from "./pages/PostPage";
-import EditPost from "./pages/EditPost";
+import ReactQuill from "react-quill";
 
-function App() {
+export default function Editor({ value, onChange }) {
+  const modules = {
+    toolbar: [
+      [{ header: [1, 2, false] }],
+      ["bold", "italic", "underline", "strike", "blockquote"],
+      [
+        { list: "ordered" },
+        { list: "bullet" },
+        { indent: "-1" },
+        { indent: "+1" },
+      ],
+      ["link", "image"],
+      ["clean"],
+    ],
+  };
   return (
-    <UserContextProvider>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<IndexPage />} />
-          <Route path={"/login"} element={<RegLogin />} />
-          <Route path={"/register"} element={<RegLogin />} />
-          <Route path={"/create"} element={<CreatePost />} />
-          <Route path={"/post/:id"} element={<PostPage />} />
-          <Route path="/edit/:id" element={<EditPost />} />
-        </Route>
-      </Routes>
-    </UserContextProvider>
+    <div className="content">
+      <ReactQuill
+        theme={"snow"}
+        value={value}
+        modules={modules}
+        onChange={onChange}
+        style={{ marginTop: "10px", width: "90%", marginLeft: "10px" }}
+      />
+    </div>
   );
 }
-
-export default App;
